@@ -128,13 +128,13 @@ public class Application implements IApplication {
    * @throws IOException 
    */
   void storeQuote(Quote quote, String filename) throws IOException {
-	String path = "joke/";
+	String path = WORKSPACE_DIRECTORY + "/";
 	
     for (String tag : quote.getTags()) {
           path += tag + "/";
     }
     new File(path).mkdirs();
-    try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path + filename + ".txt"), "utf-8"))) {
+    try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path + filename), "utf-8"))) {
        writer.write(quote.getQuote());
     }
   }
@@ -148,26 +148,11 @@ public class Application implements IApplication {
     explorer.explore(new File(WORKSPACE_DIRECTORY), new IFileVisitor() {
       @Override
       public void visit(File file) {
-        /*
-         * There is a missing piece here. Notice how we use an anonymous class here. We provide the implementation
-         * of the the IFileVisitor interface inline. You just have to add the body of the visit method, which should
-         * be pretty easy (we want to write the filename, including the path, to the writer passed in argument).
-         */
-    	  File[] listOfFilesAndDir = file.listFiles();
-    	  
-    	  if(listOfFilesAndDir != null) {
-    		  for(File f : listOfFilesAndDir) {
-    			  if(f.isDirectory()) {
-    				  visit(f);
-    			  }
-    			  if(f.isFile()) {
-    				  try {
-    					  writer.write(f.getAbsolutePath());
-    				  } catch(IOException e) {
-    				  }
-    			  }
-    		  }
-    	  }
+		try {
+			writer.write(file.getPath() + '\n');
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
       }
     });
   }
