@@ -17,25 +17,55 @@ import java.util.logging.Logger;
  */
 public class FileNumberingFilterWriter extends FilterWriter {
 
-  private static final Logger LOG = Logger.getLogger(FileNumberingFilterWriter.class.getName());
+	private int counter = 0;
+	private boolean mightBeWindowsReturn = false;
 
-  public FileNumberingFilterWriter(Writer out) {
-    super(out);
-  }
+	private static final Logger LOG = Logger.getLogger(FileNumberingFilterWriter.class.getName());
 
-  @Override
-  public void write(String str, int off, int len) throws IOException {
-    throw new UnsupportedOperationException("The student has not implemented this method yet.");
-  }
+	public FileNumberingFilterWriter(Writer out) {
+		super(out);
+	}
 
-  @Override
-  public void write(char[] cbuf, int off, int len) throws IOException {
-    throw new UnsupportedOperationException("The student has not implemented this method yet.");
-  }
+	@Override
+	public void write(String str, int off, int len) throws IOException {
+		write(str.toCharArray(), off, len);
+	}
 
-  @Override
-  public void write(int c) throws IOException {
-    throw new UnsupportedOperationException("The student has not implemented this method yet.");
-  }
+	@Override
+	public void write(char[] cbuf, int off, int len) throws IOException {
+		for (int i = off; i < off + len; ++i) {
+			write(cbuf[i]);
+		}
+	}
+
+	@Override
+	public void write(int c) throws IOException {
+		if (counter == 0) {
+			super.write("" + ++counter + '\t');
+		}
+
+		if (mightBeWindowsReturn) {
+			mightBeWindowsReturn = false;
+			if (c == '\n') {
+				super.write(c);
+				super.write("" + ++counter + '\t');
+				return;
+			} else {
+				super.write("" + ++counter + '\t');
+			}
+		}
+
+		if (c == '\r') {
+			mightBeWindowsReturn = true;
+			super.write(c);
+		}
+		else if (c == '\n') {
+			super.write(c);
+			super.write("" + ++counter + '\t');
+		} else {
+			super.write(c);
+			mightBeWindowsReturn = false;
+		}
+	}
 
 }
